@@ -28,8 +28,12 @@ def update_question(index):
 
 @app.route('/')
 def index():
+    return render_template('index.html')
+
+@app.route('/questionnaire')
+def questionnaire():
     recorded, questions = get_questions()
-    return render_template('index.html', recorded=recorded, questions=questions)
+    return render_template('questionnaire.html', recorded=recorded, questions=questions)
 
 @app.route('/update_question', methods=['POST'])
 def update():

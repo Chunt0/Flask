@@ -1,99 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Question Recorder</title>
+    <style>
+        .image-button {
+            display: inline-block;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <h1 id="index"></h1>
-    <h1 id="question"></h1>
-    <button onclick="startRecording()">Start Recording</button>
-    <button onclick="stopRecording()" disabled>Stop Recording</button>
-    <button onclick="moveNext()">Next Question</button>
-    <div id="recordingIndicator" style="width: 20px; height: 20px; background-color: grey;"></div>
-    
-    <script>
-        let currentQuestion = 0;
-        let mediaRecorder;
-        let chunks = [];
-        let recorded =  {{ recorded|tojson|safe }};
-        let questions = {{ questions|tojson|safe }};
-        let randomArray = generateRandomArray(questions.length);
-        let counter = 0;
-        
-        currentQuestion = findNextUnansweredQuestion(counter);
-        document.getElementById("index").textContent = currentQuestion;
-        document.getElementById("question").textContent = questions[currentQuestion];
-       
-        function generateRandomArray(length) {
-            const array = Array.from({ length }, (_, index) => index);
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
-            }
-            return array;
-        }
-
-        function findNextUnansweredQuestion(startIndex) {
-           for (let i = startIndex; i < randomArray.length; i++) {
-                if (recorded[randomArray[i]] === '0') {
-                    return randomArray[i]; // Return index of the next unanswered question
-                }
-            }       
-            return -1; // All questions are answered
-        }
-
-        function moveNext() {
-            counter++;
-            currentQuestion = findNextUnansweredQuestion(counter);
-            if (currentQuestion !== -1) {
-                document.getElementById("index").textContent = currentQuestion;
-                document.getElementById("question").textContent = questions[currentQuestion];
-            } else {
-                document.getElementById("index").textContent = "";
-                document.getElementById("question").textContent = "All questions have been answered.";
-                document.querySelector("button[onclick='startRecording()']").disabled = true;
-                document.querySelector("button[onclick='stopRecording()']").disabled = true;
-            }
-        }
-
-        async function startRecording() {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
-            mediaRecorder.onstop = download;
-            mediaRecorder.start();
-            document.querySelector("button[onclick='stopRecording()']").disabled = false;
-            document.getElementById("recordingIndicator").style.backgroundColor = "red"; // Change color when recording
-        }
-
-        function stopRecording() {
-            mediaRecorder.stop();
-            document.querySelector("button[onclick='stopRecording()']").disabled = true;
-            document.getElementById("recordingIndicator").style.backgroundColor = "grey"; // Change color back when not recording
-        }
-
-        function download() {
-            const blob = new Blob(chunks, { type: 'audio/wav' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `question${currentQuestion}.wav`;
-            a.click();
-            // update the CSV, move to the next question
-            fetch('/update_question', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ index: currentQuestion }),
-            }).then(response => response.json())
-            .then(data => {
-                moveNext(); // Move to the next unanswered question
-            });
-        }
-    </script>
+    <h1>QA Recorder</h1>
+    <a href="/questionnaire">
+        <img src="./static/chimpanzee.webp" alt="Button" height="320" class="image-button">
+    </a>
+    <h2>Unleash</h2>
+    <p></p>
 </body>
 </html>
