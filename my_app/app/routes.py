@@ -1,5 +1,6 @@
 from flask import render_template, url_for
 from app import db
+from app import app
 from app.models import User
 from app.forms import LoginForm
 from app.auth import login_required
