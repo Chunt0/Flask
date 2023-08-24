@@ -15,7 +15,7 @@
         .login-form {
             display: inline-block;
             text-align: left;
-            padding: 20px;
+            padding: 30px;
             border: 1px solid #ccc;
             border-radius: 5px;
             background-color: #f8f8f8;
@@ -46,17 +46,18 @@
     <div class="login-container">
         <h1></h1>
         <a href="/dashboard">
-            <img src="./static/chimpanzee.webp" alt="Button" height="320" class="image-button">
+            <img src="./static/img/chimpanzee.webp" alt="Button" height="320" class="image-button">
         </a>
         <h2>unleash</h2>
             <div class="login-form">
             <h3>Sign In</h3>
-            <form action="/dashboard" method="POST">
+            <form action="" method="POST">
+                {{form.hidden_tag()}}
                 <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
+                {{form.username}}
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-                <button type="submit">Sign In</button>
+                {{form.password}}
+                {{form.submit}}
             </form>
         </div>
         <p><a href="/signup">Sign Up</a></p>

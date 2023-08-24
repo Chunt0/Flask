@@ -47,19 +47,15 @@
     </style>
 </head>
 <body>
-    <h1>User Sign Up</h1>
+    <h1>Sign Up</h1>
     <div class="box">
         <form>
+            {{form.hidden_tag()}}
             <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
-            
+            {{form.username}}
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-            
-            <label for="confirmPassword">Confirm Password:</label>
-            <input type="password" id="confirmPassword" name="confirmPassword" required>
-            
-            <button type="submit">Sign Up</button>
+            {{form.password}}
+            {{form.submit}}
         </form>
     </div>
 </body>

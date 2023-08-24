@@ -1,8 +1,41 @@
 import csv
 import pandas as pd
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import InputRequired, Length, ValidationError
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
+
+# Set up the SQLlite database config
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SECRET_KEY'] = 'secretkey'
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(20), nullable=False, unique=True)
+    password = db.Column(db.String(80), nullable=False)
+
+class RegistrationForm(FlaskForm):
+    username = StringField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "ChimpMagnet"})
+    password = PasswordField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "password"})
+    submit =SubmitField("Register")
+
+    def validate_username(self, username):
+        existing_user_name = User.query.filter_by(username=username.data).first()
+
+        if existing_user_name:
+            raise ValidationError("That username already exists.")
+       
+class LoginForm(FlaskForm):
+    username = StringField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "ChimpMagnet"})
+    password = PasswordField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "password"})
+    submit =SubmitField("Sign In")
 
 def get_questions():
     recorded = []
@@ -30,14 +63,23 @@ def update_question(index,flag):
     df.to_csv('data.csv', index=False)
 
 # Sign in screen, asks for username and password or allows new users to make an account
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    form = LoginForm()
+    return render_template('index.html', form=form)
 
 # Registers a new user, then sends them back to the login screen
-@app.route('/signup')
-def new_user():
-    return render_template('signup.html')
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data)
+        new_user = User(username=form.username.data, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for('login'))
+
+    return render_template('signup.html', form=form)
 
 # Loads user page. Allows user to access their questionnare and access other apps as they are developed
 @app.route('/dashboard')
